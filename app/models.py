@@ -58,3 +58,12 @@ class AcademicNotes(db.Model):
     db.relationship('Notes',backref='academic_notes')
 
 
+class Events(db.Model):
+    __tablename__ = 'events'
+
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    desc=db.Column(db.String(255),nullable=True)
+    title=db.Column(db.String(50),nullable=False)
+    submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
+    submitted_on=db.Column(db.DateTime,nullable=False)
+    poster_url=db.Column(db.String(255),nullable=False) 
