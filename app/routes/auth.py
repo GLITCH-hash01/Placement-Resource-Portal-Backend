@@ -20,7 +20,7 @@ def login():
     return jsonify({'message':'User doesn\'t exist'}),401
   
   if check_password_hash(user.password_hash,password):
-    access_token=create_access_token(identity=user.id)
+    access_token=create_access_token(identity=str(user.id))
     response={
     'message':'User logged in successfully',
     'access_token':access_token,
@@ -43,8 +43,16 @@ def signup():
   email=request_data['email']
   department=request_data['department']
   role=request_data['role']
+
+  if role not in ['student', 'faculty', 'admin', 'alumni', 'tpc', 'eventorgs']:
+    return jsonify({'message':'Invalid role'}),400
   
+  if Users.query.filter_by(email=email).first() is not None:
+    return jsonify({'message':'User already exists'}),400
+
   password_hash=generate_password_hash(password)
+
+
   user=Users(username=username,password_hash=password_hash,email=email,department=department,role=role)
   
   try:
