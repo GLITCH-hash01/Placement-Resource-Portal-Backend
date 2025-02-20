@@ -45,7 +45,7 @@ def upload_note():
 
   new_note= Notes(
     title=f'{course_code}_S{semester}_M{module}',
-    submitted_by='1',
+    submitted_by=int(get_jwt_identity()),
     submitted_on=datetime.now(),
     doc_url=result['secure_url'],
     likes=0,
@@ -75,3 +75,17 @@ def upload_note():
   return jsonify({'message':'Note uploaded successfully','data':{'url':result['secure_url']}}),200
   
   
+@notes_bp.route('/me/get',methods=['GET'])
+@jwt_required()
+def get_submitted_by_me():
+  user_id=int(get_jwt_identity())
+  notes=Notes.query.filter_by(submitted_by=user_id).all()
+  note_list=[]
+  for note in notes:
+    note_list.append({
+      'title':note.title,
+      'submitted_on':note.submitted_on,
+      'doc_url':note.doc_url,
+      'likes':note.likes
+    })
+  return jsonify({'notes':note_list}),200

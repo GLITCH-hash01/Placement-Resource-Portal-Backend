@@ -67,3 +67,21 @@ class Events(db.Model):
     submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     submitted_on=db.Column(db.DateTime,nullable=False)
     poster_url=db.Column(db.String(255),nullable=False) 
+
+
+class Roadmaps(db.Model):
+    __tablename__ = 'roadmaps'
+
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    department=db.Column(db.String(50),nullable=False)
+    year=db.Column(db.Integer,nullable=False)
+    course=db.Column(db.String(255),nullable=True)
+
+class RoadmapCourses(db.Model):
+    __tablename__ = 'roadmap_courses'
+
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    roadmap_id=db.Column(db.Integer,db.ForeignKey('roadmaps.id'),nullable=False)
+    course_title=db.Column(db.String(150),nullable=False)
+    course_resourses=db.Column(db.String(255),nullable=False)
+

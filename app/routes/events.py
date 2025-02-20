@@ -58,4 +58,13 @@ def upload_events():
   
   return jsonify({'message':'Event uploaded successfully','data':{'url':result['secure_url']}}),200
   
-  
+
+@events_bp.route('/me/get',methods=['GET'])
+@jwt_required()
+def get_my_events():
+  user_id=int(get_jwt_identity())
+  events=Events.query.filter_by(submitted_by=user_id).all()
+  event_list=[]
+  for event in events:
+    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
+  return jsonify({'events':event_list}),200
