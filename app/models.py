@@ -11,6 +11,7 @@ class Users(db.Model):
     department = db.Column(db.String(10), nullable=False)
     role = db.Column(sa.Enum('student', 'faculty', 'admin', 'alumni', 'tpc', 'eventorgs', name='user_roles'), nullable=False)
 
+    db.relationship('Student',backref='users',uselist=False)
 
 class Alumni(db.Model):
     __tablename__ = 'alumni'
@@ -85,3 +86,38 @@ class RoadmapCourses(db.Model):
     course_title=db.Column(db.String(150),nullable=False)
     course_resourses=db.Column(db.String(255),nullable=False)
 
+class Queries(db.Model):
+    __tablename__ = 'queries'
+
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    query_title=db.Column(db.String(255),nullable=False)
+    query_desc=db.Column(db.String(255),nullable=False)
+    submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
+    submitted_on=db.Column(db.DateTime,nullable=False)
+    stack=db.Column(db.String(50),nullable=True)
+
+    responses=db.relationship('Responses',backref='queries',cascade='all,delete-orphan')
+    queries_likes=db.relationship('QueriesLikes',backref='queries',cascade='all,delete-orphan')
+
+class Responses(db.Model):
+    __tablename__ = 'responses'
+
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    query_id=db.Column(db.Integer,db.ForeignKey('queries.id'),nullable=False)
+    response=db.Column(db.String(255),nullable=False)
+    responded_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
+    responded_on=db.Column(db.DateTime,nullable=False)
+
+    db.relationship('QueriesLikes',backref='responses',cascade='all,delete-orphan')
+
+
+class QueriesLikes(db.Model):
+    __tablename__ = 'queries_likes'
+
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    query_id=db.Column(db.Integer,db.ForeignKey('queries.id'),nullable=False)
+    liked_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
+    response_id=db.Column(db.Integer,db.ForeignKey('responses.id'),nullable=True)
+
+    db.relationship('Queries',backref='queries_likes')
+    db.relationship('Responses',backref='queries_likes')

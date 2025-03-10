@@ -21,10 +21,12 @@ def create_app():
     from .routes.notes import notes_bp
     from .routes.events import events_bp
     from .routes.roadmaps import roadmaps_bp
+    from .routes.queries import queries_bp
 
     app.register_blueprint(auth,url_prefix='/auth')
     app.register_blueprint(notes_bp,url_prefix='/notes')
     app.register_blueprint(events_bp,url_prefix='/events')
     app.register_blueprint(roadmaps_bp,url_prefix='/roadmaps')
+    app.register_blueprint(queries_bp,url_prefix='/queries')
 
     return app
