@@ -89,3 +89,44 @@ def get_submitted_by_me():
       'likes':note.likes
     })
   return jsonify({'notes':note_list}),200
+
+
+@notes_bp.route('/all/get',methods=['GET'])
+def get_submitted_by_all():
+  notes=Notes.query.all()
+  note_list=[]
+  for note in notes:
+    note_list.append({
+      'title':note.title,
+      'submitted_on':note.submitted_on,
+      'doc_url':note.doc_url,
+      'likes':note.likes
+    })
+  return jsonify({'notes':note_list}),200
+
+@notes_bp.route('/placements',methods=['GET'])
+@jwt_required()
+def get_all_placements():
+  placements=Notes.query.filter_by(category='placement').all()
+  placement_list=[]
+  for placement in placements:
+    placement_list.append({
+      'title':placement.title,
+      'submitted_on':placement.submitted_on,
+      'doc_url':placement.doc_url,
+      'likes':placement.likes
+    })
+  return jsonify({'placements':placement_list}),200
+
+@notes_bp.route('/<string:dep>/<int:scheme>/<int:sem>/<string:course>/<int:mod>',methods=['GET'])
+@jwt_required()
+def get_course_notes(dep,scheme,sem,course,mod):
+  
+  note=AcademicNotes.query.filter_by(scheme=scheme,semester=sem,course_code=course,module=mod).first()
+  course=Notes.query.filter_by(id=note.note_id).first()
+  print(note.note_id)
+  return jsonify({'title':course.title,'submitted_on':course.submitted_on,'doc_url':course.doc_url}),200
+
+
+  
+  

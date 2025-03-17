@@ -68,3 +68,13 @@ def get_my_events():
   for event in events:
     event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
   return jsonify({'events':event_list}),200
+
+@events_bp.route('/get-all',methods=['GET'])
+@jwt_required()
+def get_all_events():
+  events=Events.query.all()
+  event_list=[]
+  for event in events:
+    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
+  return jsonify({'events':event_list}),200
+
