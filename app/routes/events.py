@@ -78,3 +78,19 @@ def get_all_events():
     event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
   return jsonify({'events':event_list}),200
 
+@events_bp.route('/latest',methods=['GET'])
+@jwt_required()
+def get_latest_events():
+  events=Events.query.order_by(Events.submitted_on.desc()).limit(5).all()
+  event_list=[]
+  for event in events:
+    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
+  return jsonify({'events':event_list}),200
+
+@events_bp.route('/get/<int:event_id>',methods=['GET'])
+@jwt_required()
+def get_event(event_id):
+  event=Events.query.filter_by(id=event_id).first()
+  if not event:
+    return jsonify({'message':'Event not found'}),404
+  return jsonify({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,"submitted_by":event.submitted_by}),200

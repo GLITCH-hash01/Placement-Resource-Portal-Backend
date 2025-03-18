@@ -129,4 +129,30 @@ def get_course_notes(dep,scheme,sem,course,mod):
 
 
   
-  
+@notes_bp.route('/latest',methods=['GET'])
+@jwt_required()
+def get_latest_notes():
+  notes=Notes.query.order_by(Notes.submitted_on.desc()).limit(5).all()
+  note_list=[]
+  for note in notes:
+    if note.category=='academics':
+      academic_details=AcademicNotes.query.filter_by(note_id=note.id).first()
+      note_list.append({
+        'title':note.title,
+        'submitted_on':note.submitted_on,
+        'doc_url':note.doc_url,
+        'likes':note.likes,
+        'semester':academic_details.semester,
+        'course_code':academic_details.course_code,
+        'module':academic_details.module,
+        'scheme':academic_details.scheme,
+        'year':academic_details.year
+      })
+    else:
+      note_list.append({
+      'title':note.title,
+      'submitted_on':note.submitted_on,
+      'doc_url':note.doc_url,
+      'likes':note.likes
+    })
+  return jsonify({'notes':note_list}),200

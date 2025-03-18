@@ -139,3 +139,29 @@ def like_response(response_id):
     db.session.add(like)
     db.session.commit()
     return jsonify({'message':'Response liked successfully'}),200 
+
+@queries_bp.route('/get/<int:query_id>',methods=['GET'])
+@jwt_required()
+def get_query(query_id):
+    query=db.session.query(Queries).filter(Queries.id==query_id).first()
+    if not query:
+        return jsonify({'message':'Query not found'}),404
+    
+    response_list=[]
+    if query.responses:
+        response_list=[{
+            'response':response.response,
+            'responded_by':response.responded_by,
+            'responded_on':response.responded_on
+        } for response in query.responses]
+    
+    return jsonify({"query":{
+        'query_id':query.id,
+        'query_title':query.query_title,
+        'query_desc':query.query_desc,
+        'response_count':len(response_list),
+        'responses':response_list,
+        'stack':query.stack,
+        'submitted_by':query.submitted_by,
+        'submitted_on':query.submitted_on
+    }}),200
