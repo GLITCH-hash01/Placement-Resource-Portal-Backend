@@ -54,6 +54,7 @@ class AcademicNotes(db.Model):
     course_code=db.Column(db.String(50),nullable=False)
     module=db.Column(db.Integer,nullable=False)
     scheme=db.Column(db.Integer,nullable=False)
+    department=db.Column(db.String(50),nullable=True)
     year=db.Column(db.Integer,nullable=False)
 
     db.relationship('Notes',backref='academic_notes')
@@ -121,3 +122,11 @@ class QueriesLikes(db.Model):
 
     db.relationship('Queries',backref='queries_likes')
     db.relationship('Responses',backref='queries_likes')
+
+class CourseList(db.Model):
+    __tablename__ = 'course_list'   
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    department=db.Column(db.String(50),nullable=False)
+    course_code=db.Column(db.String(50),nullable=False)
+    course_title=db.Column(db.String(150),nullable=False)
+    semester=db.Column(db.Integer,nullable=False)

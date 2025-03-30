@@ -1,6 +1,6 @@
 from flask import Blueprint,jsonify,request
 from flask_jwt_extended import jwt_required,get_jwt_identity
-from app.models import Notes,AcademicNotes
+from app.models import Notes,AcademicNotes,CourseList
 import cloudinary.uploader as uploader
 from datetime import datetime
 from app.database import db
@@ -74,6 +74,55 @@ def upload_note():
   
   return jsonify({'message':'Note uploaded successfully','data':{'url':result['secure_url']}}),200
   
+@notes_bp.route('/upload/placement',methods=['POST'])
+@jwt_required()
+def upload_note_placement():
+
+  request_data=request.form.to_dict()
+
+  if 'note' not in request.files:
+    return jsonify({'message':'No file part'}),400
+  
+  required_fields = ['title']
+  for field in required_fields:
+      if field not in request_data:
+          return jsonify({'message': f'Missing field: {field}'}), 400
+
+
+
+  file=request.files['note']
+  if file.filename=='':
+    return jsonify({'message':'No selected file'}),400
+  
+  allowed_mimetypes = ['application/pdf', 'text/plain']
+  if file.mimetype not in allowed_mimetypes:
+      return jsonify({'message': 'Invalid file type'}), 400
+  
+  try:
+    result=uploader.upload(file)
+  except Exception as e:
+    print(e)
+    return jsonify({'message':"Error in file uploading"}),500
+  
+
+
+  new_note= Notes(
+    title=f'{request_data['title']}',
+    submitted_by=int(get_jwt_identity()),
+    submitted_on=datetime.now(),
+    doc_url=result['secure_url'],
+    likes=0,
+    category='placement'
+  )
+
+  try:
+    db.session.add(new_note)
+    db.session.commit()
+  except:
+    return jsonify({'message':'Error saving note'}),500
+  
+  
+  return jsonify({'message':'Note uploaded successfully','data':{'url':result['secure_url'],'title':request_data['title']}}),200
   
 @notes_bp.route('/me/get',methods=['GET'])
 @jwt_required()
@@ -123,8 +172,11 @@ def get_all_placements():
 def get_course_notes(dep,scheme,sem,course,mod):
   
   note=AcademicNotes.query.filter_by(scheme=scheme,semester=sem,course_code=course,module=mod).first()
+  if not note:
+    return jsonify({'message':'No notes found'}),
+  
   course=Notes.query.filter_by(id=note.note_id).first()
-  print(note.note_id)
+
   return jsonify({'title':course.title,'submitted_on':course.submitted_on,'doc_url':course.doc_url}),200
 
 
@@ -156,3 +208,54 @@ def get_latest_notes():
       'likes':note.likes
     })
   return jsonify({'notes':note_list}),200
+
+@notes_bp.route('courses/list/<string:dep>/<int:sem>',methods=['POST'])
+@jwt_required()
+def add_courses_sem(dep,sem):
+  request_data=request.get_json()
+  if "courses" not in request_data:
+    return jsonify({'message':'No courses found'}),400
+  
+  for course in request_data["courses"]:
+    existing_course = CourseList.query.filter_by(course_code=course['course_code'], department=dep).first()
+    if existing_course:
+        return jsonify({'message': f'Course {course["course_code"]} already exists in department {dep}'}), 400
+    
+    new_course=CourseList(
+      semester=sem,
+      course_code=course['course_code'],
+      course_title=course['course_title'],
+      department=dep
+    )
+
+    try:
+      db.session.add(new_course)
+      db.session.commit()
+    except Exception as e:
+      print(e)
+      return jsonify({'message':'Error saving course'}),500
+  return jsonify({'message':'Courses added successfully'}),200
+
+@notes_bp.route('courses/list/<string:dep>/<int:sem>',methods=['GET'])
+@jwt_required()
+def get_courses_sem(dep,sem):
+  courses=CourseList.query.filter_by(semester=sem,department=dep).all()
+  course_list=[]
+  for course in courses:
+    course_list.append({
+      'course_code':course.course_code,
+      'course_title':course.course_title
+    })
+  return jsonify({'courses':course_list}),200
+
+@notes_bp.route('course/modules/<string:course_code>',methods=['GET'])
+@jwt_required()
+def get_course_modules(course_code):
+ 
+  modules=AcademicNotes.query.filter_by(course_code=course_code).distinct(AcademicNotes.module).all()
+  module_list=[]
+  for module in modules:
+    module_list.append(
+      module.module
+    )
+  return jsonify({'modules':module_list}),200
