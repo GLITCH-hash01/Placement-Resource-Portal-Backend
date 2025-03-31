@@ -18,8 +18,6 @@ def yearcalc(sem):
   elif sem<=8:
     return 4
 
-
-
 @notes_bp.route('/upload',methods=['POST'])
 @jwt_required()
 def upload_note():
@@ -124,7 +122,6 @@ def upload_note_placement():
     submitted_by=int(get_jwt_identity()),
     submitted_on=datetime.now(),
     doc_url=result['secure_url'],
-    likes=0,
     category='placement'
   )
 
@@ -148,8 +145,7 @@ def get_submitted_by_me():
       'id':note.id,
       'title':note.title,
       'submitted_on':note.submitted_on,
-      'doc_url':note.doc_url,
-      'likes':note.likes
+      'doc_url':note.doc_url
     })
   return jsonify({'notes':note_list}),200
 
@@ -162,8 +158,7 @@ def get_submitted_by_all():
     note_list.append({
       'title':note.title,
       'submitted_on':note.submitted_on,
-      'doc_url':note.doc_url,
-      'likes':note.likes
+      'doc_url':note.doc_url
     })
   return jsonify({'notes':note_list}),200
 
@@ -176,8 +171,7 @@ def get_all_placements():
     placement_list.append({
       'title':placement.title,
       'submitted_on':placement.submitted_on,
-      'doc_url':placement.doc_url,
-      'likes':placement.likes
+      'doc_url':placement.doc_url
     })
   return jsonify({'placements':placement_list}),200
 
@@ -207,7 +201,6 @@ def get_latest_notes():
         'title':note.title,
         'submitted_on':note.submitted_on,
         'doc_url':note.doc_url,
-        'likes':note.likes,
         'semester':academic_details.semester,
         'course_code':academic_details.course_code,
         'module':academic_details.module,
@@ -218,8 +211,7 @@ def get_latest_notes():
       note_list.append({
       'title':note.title,
       'submitted_on':note.submitted_on,
-      'doc_url':note.doc_url,
-      'likes':note.likes
+      'doc_url':note.doc_url
     })
   return jsonify({'notes':note_list}),200
 
@@ -284,8 +276,7 @@ def get_latest_placements():
     placement_list.append({
       'title':placement.title,
       'submitted_on':placement.submitted_on,
-      'doc_url':placement.doc_url,
-      'likes':placement.likes
+      'doc_url':placement.doc_url
     })
   return jsonify({'placements':placement_list}),200
 

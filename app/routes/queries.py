@@ -34,11 +34,10 @@ def add_query():
         if field not in data:
             return jsonify({'message':f'{field} is required'}),400
     
-    if 'stack' not in data:
-        data['stack']=''
+  
 
     user=db.session.query(Users).filter(Users.id==user_id).first()
-    query=Queries(submitted_by=user.id,query_title=data['query_title'],query_desc=data['query_desc'],stack=data['stack'] ,submitted_on=datetime.now())
+    query=Queries(submitted_by=user.id,query_title=data['query_title'],query_desc=data['query_desc'] ,submitted_on=datetime.now())
     db.session.add(query)
     
     db.session.commit()
@@ -94,9 +93,7 @@ def get_queries():
             'query_title':query.query_title,
             'query_desc':query.query_desc,
             'responses':response_list,
-            'stack':query.stack,
             'submitted_by':user_data,
-            
             'submitted_on':time_ago(query.submitted_on)
         })
     return jsonify({'queries':query_list}),200
@@ -137,45 +134,14 @@ def get_my_queries():
             'query_title':query.query_title,
             'query_desc':query.query_desc,
             'responses':response_list,
-            'stack':query.stack,
             'submitted_by':user_data,
             'submitted_on':time_ago(query.submitted_on)
         })
     return jsonify({'queries':query_list}),200
 
-@queries_bp.route('/like/query/<int:query_id>',methods=['POST'])
-@jwt_required()
-def like_query(query_id):
-    user_id=get_jwt_identity()
-    query=db.session.query(Queries).filter(Queries.id==query_id).first()
-    if not query:
-        return jsonify({'message':'Query not found'}),404
-    
-    like=db.session.query(QueriesLikes).filter(QueriesLikes.query_id==query_id,QueriesLikes.liked_by==user_id).first()
-    if like:
-        return jsonify({'message':'Query already liked'}),400
-    
-    like=QueriesLikes(query_id=query_id,liked_by=user_id)
-    db.session.add(like)
-    db.session.commit()
-    return jsonify({'message':'Query liked successfully'}),200
 
-@queries_bp.route('/like/response/<int:response_id>',methods=['POST'])
-@jwt_required()
-def like_response(response_id):
-    user_id=get_jwt_identity()
-    response=db.session.query(Responses).filter(Responses.id==response_id).first()
-    if not response:
-        return jsonify({'message':'Response not found'}),404
-    
-    like=db.session.query(QueriesLikes).filter(QueriesLikes.response_id==response_id,QueriesLikes.liked_by==user_id).first()
-    if like:
-        return jsonify({'message':'Response already liked'}),400
-    
-    like=QueriesLikes(response_id=response_id,liked_by=user_id)
-    db.session.add(like)
-    db.session.commit()
-    return jsonify({'message':'Response liked successfully'}),200 
+
+
 
 @queries_bp.route('/get/<int:query_id>',methods=['GET'])
 @jwt_required()
@@ -208,7 +174,6 @@ def get_query(query_id):
         'query_desc':query.query_desc,
         'response_count':len(response_list),
         'responses':response_list,
-        'stack':query.stack,
         'submitted_by':{
             'id': user.id,
             'username': user.username,

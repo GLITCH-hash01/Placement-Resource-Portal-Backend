@@ -17,12 +17,12 @@ class Notes(db.Model):
     __tablename__ = 'notes'
 
     id=db.Column(db.Integer,primary_key=True,autoincrement=True)
-    desc=db.Column(db.String(255),nullable=True)
+    # desc=db.Column(db.String(255),nullable=True)
     title=db.Column(db.String(50),nullable=False)
     submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     submitted_on=db.Column(db.DateTime,nullable=False)
     doc_url=db.Column(db.String(255),nullable=False) 
-    likes=db.Column(db.Integer,nullable=False)
+    # likes=db.Column(db.Integer,nullable=False)
     category=db.Column(sa.Enum('academics','placement',name='note_categories'),nullable=False)
 
 class AcademicNotes(db.Model):
@@ -33,7 +33,7 @@ class AcademicNotes(db.Model):
     semester=db.Column(db.Integer,nullable=False)
     course_code=db.Column(db.String(50),nullable=False)
     module=db.Column(db.Integer,nullable=False)
-    scheme=db.Column(db.Integer,nullable=False)
+    scheme=db.Column(db.Integer,nullable=False,default=2019)
     department=db.Column(db.String(50),nullable=True)
     year=db.Column(db.Integer,nullable=False)
 
@@ -44,7 +44,6 @@ class Events(db.Model):
     __tablename__ = 'events'
 
     id=db.Column(db.Integer,primary_key=True,autoincrement=True)
-    desc=db.Column(db.String(255),nullable=True)
     title=db.Column(db.String(50),nullable=False)
     submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     category=db.Column(sa.Enum('event','internship',name='event_categories'),nullable=False,default='event')
@@ -77,10 +76,10 @@ class Queries(db.Model):
     query_desc=db.Column(db.String(255),nullable=False)
     submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     submitted_on=db.Column(db.DateTime,nullable=False)
-    stack=db.Column(db.String(50),nullable=True)
+    
 
     responses=db.relationship('Responses',backref='queries',cascade='all,delete-orphan')
-    queries_likes=db.relationship('QueriesLikes',backref='queries',cascade='all,delete-orphan')
+    
 
 class Responses(db.Model):
     __tablename__ = 'responses'
