@@ -89,7 +89,6 @@ class Responses(db.Model):
     responded_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     responded_on=db.Column(db.DateTime,nullable=False)
 
-    db.relationship('QueriesLikes',backref='responses',cascade='all,delete-orphan')
 
 class CourseList(db.Model):
     __tablename__ = 'course_list'   
