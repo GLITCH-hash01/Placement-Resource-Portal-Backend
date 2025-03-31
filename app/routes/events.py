@@ -16,13 +16,17 @@ def upload_events():
   if 'poster' not in request.files:
     return jsonify({'message':'No file part'}),400
   
-  required_fields = ['title', 'desc']
+  required_fields = ['title', 'desc','category','know_more']
   for field in required_fields:
       if field not in request_data:
           return jsonify({'message': f'Missing field: {field}'}), 400
 
   title=request_data['title']
   desc=request_data['desc']
+  category=request_data['category']
+  know_more=request_data['know_more']
+  if category not in ['event','internship']:
+    return jsonify({'message': 'Invalid category'}), 400
 
   file=request.files['poster']
   if file.filename=='':
@@ -44,6 +48,8 @@ def upload_events():
     title=title,
     submitted_by=int(get_jwt_identity()),
     submitted_on=datetime.now(),
+    category=category,
+    know_more=know_more,
     poster_url=result['secure_url'],
     desc=desc
   )
@@ -66,7 +72,8 @@ def get_my_events():
   events=Events.query.filter_by(submitted_by=user_id).all()
   event_list=[]
   for event in events:
-    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
+    if event.category=='event':
+      event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
   return jsonify({'events':event_list}),200
 
 @events_bp.route('/get-all',methods=['GET'])
@@ -75,7 +82,9 @@ def get_all_events():
   events=Events.query.all()
   event_list=[]
   for event in events:
-    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
+    if event.category=='event':
+      event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
+    
   return jsonify({'events':event_list}),200
 
 @events_bp.route('/latest',methods=['GET'])
@@ -84,7 +93,8 @@ def get_latest_events():
   events=Events.query.order_by(Events.submitted_on.desc()).limit(5).all()
   event_list=[]
   for event in events:
-    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url})
+    if event.category=='event':
+      event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
   return jsonify({'events':event_list}),200
 
 @events_bp.route('/get/<int:event_id>',methods=['GET'])
@@ -93,4 +103,13 @@ def get_event(event_id):
   event=Events.query.filter_by(id=event_id).first()
   if not event:
     return jsonify({'message':'Event not found'}),404
-  return jsonify({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,"submitted_by":event.submitted_by}),200
+  return jsonify({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,"submitted_by":event.submitted_by,'know_more':event.know_more}),200
+
+@events_bp.route('/internships/latest',methods=['GET'])
+@jwt_required()
+def get_latest_internships():
+  events=Events.query.filter_by(category='internship').order_by(Events.submitted_on.desc()).limit(5).all()
+  event_list=[]
+  for event in events:
+    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
+  return jsonify({'events':event_list}),200

@@ -251,6 +251,7 @@ def get_courses_sem(dep,sem):
 @notes_bp.route('course/modules/<string:course_code>',methods=['GET'])
 @jwt_required()
 def get_course_modules(course_code):
+
  
   modules=AcademicNotes.query.filter_by(course_code=course_code).distinct(AcademicNotes.module).all()
   module_list=[]
@@ -259,3 +260,17 @@ def get_course_modules(course_code):
       module.module
     )
   return jsonify({'modules':module_list}),200
+
+@notes_bp.route('/placements/latest',methods=['GET'])
+@jwt_required()
+def get_latest_placements():
+  placements=Notes.query.filter_by(category='placement').order_by(Notes.submitted_on.desc()).limit(5).all()
+  placement_list=[]
+  for placement in placements:
+    placement_list.append({
+      'title':placement.title,
+      'submitted_on':placement.submitted_on,
+      'doc_url':placement.doc_url,
+      'likes':placement.likes
+    })
+  return jsonify({'placements':placement_list}),200
