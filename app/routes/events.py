@@ -93,8 +93,9 @@ def get_latest_events():
   events=Events.query.order_by(Events.submitted_on.desc()).limit(5).all()
   event_list=[]
   for event in events:
-    if event.category=='event':
-      event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
+    
+    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
+
   return jsonify({'events':event_list}),200
 
 @events_bp.route('/get/<int:event_id>',methods=['GET'])

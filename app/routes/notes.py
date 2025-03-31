@@ -7,6 +7,19 @@ from app.database import db
 
 notes_bp=Blueprint('notes',__name__)
 
+def yearcalc(sem):
+  sem=int(sem)
+  if sem<=2:
+    return 1
+  elif sem<=4:
+    return 2
+  elif sem<=6:
+    return 3
+  elif sem<=8:
+    return 4
+
+
+
 @notes_bp.route('/upload',methods=['POST'])
 @jwt_required()
 def upload_note():
@@ -16,7 +29,7 @@ def upload_note():
   if 'note' not in request.files:
     return jsonify({'message':'No file part'}),400
   
-  required_fields = ['module', 'semester', 'course_code', 'scheme', 'year']
+  required_fields = ['module', 'semester', 'course_code', 'scheme']
   for field in required_fields:
       if field not in request_data:
           return jsonify({'message': f'Missing field: {field}'}), 400
@@ -25,7 +38,7 @@ def upload_note():
   semester=request_data['semester']
   course_code=request_data['course_code']
   scheme=request_data['scheme']
-  year=request_data['year']
+
 
   file=request.files['note']
   if file.filename=='':
@@ -64,7 +77,7 @@ def upload_note():
     course_code=course_code,
     module=module,
     scheme=scheme,
-    year=year
+    year=yearcalc(semester),
   )
   try:
     db.session.add(academic_details)
@@ -174,7 +187,7 @@ def get_course_notes(dep,scheme,sem,course,mod):
   
   note=AcademicNotes.query.filter_by(scheme=scheme,semester=sem,course_code=course,module=mod).first()
   if not note:
-    return jsonify({'message':'No notes found'}),
+    return jsonify({'message':'No notes found'}),404
   
   course=Notes.query.filter_by(id=note.note_id).first()
 

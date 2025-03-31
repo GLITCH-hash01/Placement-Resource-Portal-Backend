@@ -70,6 +70,7 @@ def get_roadmap(dep):
     roadmap_list=[]
     for roadmap in roadmaps:
       roadmap_list.append({'year':roadmap.year,'course':roadmap.course})
+    roadmap_list.sort(key=lambda x: x['year'])
     return jsonify({'roadmaps':roadmap_list}),200
 
 @roadmaps_bp.route('/update/<string:dep>',methods=['PUT'])

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from ..database import db
-from ..models import Users, Queries, Responses, QueriesLikes
+from ..models import Users, Queries, Responses
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 

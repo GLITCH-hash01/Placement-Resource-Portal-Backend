@@ -13,26 +13,6 @@ class Users(db.Model):
 
     db.relationship('Student',backref='users',uselist=False)
 
-class Alumni(db.Model):
-    __tablename__ = 'alumni'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
-    passout_year=db.Column(db.Integer,nullable=False)
-    occupation=db.Column(db.String(50),nullable=False)
-    registration_no=db.Column(db.String(50),nullable=False)
-
-class Student(db.Model):
-    __tablename__ = 'student'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
-    batch=db.Column(db.String(50),nullable=False)
-    passout_year=db.Column(db.Integer,nullable=False)
-    stack=db.Column(db.String(50),nullable=False)
-    registration_no=db.Column(db.String(50),nullable=False)
-
-
 class Notes(db.Model):
     __tablename__ = 'notes'
 
@@ -49,7 +29,7 @@ class AcademicNotes(db.Model):
     __tablename__='academic_notes'
 
     id=db.Column(db.Integer,primary_key=True,autoincrement=True)
-    note_id=db.Column(db.Integer,db.ForeignKey('notes.id'),nullable=False)
+    note_id=db.Column(db.Integer,db.ForeignKey('notes.id',ondelete="CASCADE"),nullable=False)
     semester=db.Column(db.Integer,nullable=False)
     course_code=db.Column(db.String(50),nullable=False)
     module=db.Column(db.Integer,nullable=False)
@@ -112,18 +92,6 @@ class Responses(db.Model):
     responded_on=db.Column(db.DateTime,nullable=False)
 
     db.relationship('QueriesLikes',backref='responses',cascade='all,delete-orphan')
-
-
-class QueriesLikes(db.Model):
-    __tablename__ = 'queries_likes'
-
-    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
-    query_id=db.Column(db.Integer,db.ForeignKey('queries.id'),nullable=False)
-    liked_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
-    response_id=db.Column(db.Integer,db.ForeignKey('responses.id'),nullable=True)
-
-    db.relationship('Queries',backref='queries_likes')
-    db.relationship('Responses',backref='queries_likes')
 
 class CourseList(db.Model):
     __tablename__ = 'course_list'   

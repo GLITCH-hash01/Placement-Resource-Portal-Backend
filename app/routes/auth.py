@@ -51,6 +51,7 @@ def signup():
     return jsonify({'message':'User already exists'}),400
 
   password_hash=generate_password_hash(password)
+  
 
 
   user=Users(username=username,password_hash=password_hash,email=email,department=department,role=role)
@@ -61,13 +62,18 @@ def signup():
     return jsonify({'message':'user already exists'}),400
   db.session.commit()
 
+  access_token=create_access_token(identity=str(user.id))
   reponse={
     'message':'User created successfully',
     'data':{
+      'access_token':access_token,
+      'user':{
+      'id':user.id,
       'username':username,
       'email':email,
       'department':department,
       'role':role
+      }
     }
   }
 
