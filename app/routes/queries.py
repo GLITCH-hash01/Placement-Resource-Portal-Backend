@@ -82,13 +82,21 @@ def get_queries():
                 'responded_by':Users.query.filter(Users.id==response.responded_by).first().username,
                 'responded_on':response.responded_on
             } for response in query.responses]
+        user = Users.query.filter(Users.id == query.submitted_by).first()
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,  # Include other fields as needed
+            'role': user.role
+        } if user else None
         query_list.append({
             'query_id':query.id,
             'query_title':query.query_title,
             'query_desc':query.query_desc,
             'responses':response_list,
             'stack':query.stack,
-            'submitted_by':Users.query.filter(Users.id==query.submitted_by).first().username,
+            'submitted_by':user_data,
+            
             'submitted_on':time_ago(query.submitted_on)
         })
     return jsonify({'queries':query_list}),200
@@ -103,18 +111,34 @@ def get_my_queries():
     for query in queries:
         response_list=[]
         if query.responses:
-            response_list=[{
-                'response':response.response,
-                'responded_by':Users.query.filter(Users.id==response.responded_by).first().username,
-                'responded_on':response.responded_on
-            } for response in query.responses]
+            for response in query.responses:
+                user = Users.query.filter(Users.id == response.responded_by).first()
+
+                response_list.append({
+                    'response':response.response,
+                    'responded_by':{
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,  # Include other fields as needed
+                        'role': user.role
+                    },
+                    'responded_on':time_ago(response.responded_on)
+                })
+           
+        user = Users.query.filter(Users.id == query.submitted_by).first()
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,  # Include other fields as needed
+            'role': user.role
+        } if user else None
         query_list.append({
             'query_id':query.id,
             'query_title':query.query_title,
             'query_desc':query.query_desc,
             'responses':response_list,
             'stack':query.stack,
-            'submitted_by':Users.query.filter(Users.id==query.submitted_by).first().username,
+            'submitted_by':user_data,
             'submitted_on':time_ago(query.submitted_on)
         })
     return jsonify({'queries':query_list}),200
@@ -162,11 +186,21 @@ def get_query(query_id):
     
     response_list=[]
     if query.responses:
-        response_list=[{
-            'response':response.response,
-            'responded_by':Users.query.filter(Users.id==response.responded_by).first().username,
-            'responded_on':time_ago(response.responded_on),
-        } for response in query.responses]
+        for response in query.responses:
+            user = Users.query.filter(Users.id == response.responded_by).first()
+
+            response_list.append({
+                'response':response.response,
+                'responded_by':{
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,  # Include other fields as needed
+                    'role': user.role
+                },
+                'responded_on':time_ago(response.responded_on)
+            })
+    
+    user = Users.query.filter(Users.id == query.submitted_by).first()
     
     return jsonify({"query":{
         'query_id':query.id,
@@ -175,6 +209,11 @@ def get_query(query_id):
         'response_count':len(response_list),
         'responses':response_list,
         'stack':query.stack,
-        'submitted_by':Users.query.filter(Users.id==query.submitted_by).first().username,
+        'submitted_by':{
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,  # Include other fields as needed
+            'role': user.role
+        },
         'submitted_on':time_ago(query.submitted_on)
     }}),200

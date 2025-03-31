@@ -73,7 +73,7 @@ def get_my_events():
   event_list=[]
   for event in events:
     
-    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more,'category':event.category})
+    event_list.append({'id':event.id,'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more,'category':event.category})
   return jsonify({'events':event_list}),200
 
 @events_bp.route('/get-all',methods=['GET'])
@@ -113,3 +113,22 @@ def get_latest_internships():
   for event in events:
     event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
   return jsonify({'events':event_list}),200
+
+@events_bp.route('/delete/<int:event_id>',methods=['DELETE'])
+@jwt_required()
+def delete_event(event_id):
+  event=Events.query.filter_by(id=event_id).first()
+  if not event:
+    return jsonify({'message':'Event not found'}),404
+  
+  user_id=int(get_jwt_identity())
+  if event.submitted_by!=user_id:
+    return jsonify({'message':'You are not authorized to delete this event'}),403
+
+  try:
+    db.session.delete(event)
+    db.session.commit()
+  except Exception as e:
+    return jsonify({'message':'Error deleting event','error':str(e)}),500
+  
+  return jsonify({'message':'Event deleted successfully'}),200
