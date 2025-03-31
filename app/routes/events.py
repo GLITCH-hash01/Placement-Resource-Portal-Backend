@@ -16,13 +16,13 @@ def upload_events():
   if 'poster' not in request.files:
     return jsonify({'message':'No file part'}),400
   
-  required_fields = ['title', 'desc','category','know_more']
+  required_fields = ['title','category','know_more']
   for field in required_fields:
       if field not in request_data:
           return jsonify({'message': f'Missing field: {field}'}), 400
 
   title=request_data['title']
-  desc=request_data['desc']
+  desc=request_data.get('desc','')
   category=request_data['category']
   know_more=request_data['know_more']
   if category not in ['event','internship']:
@@ -72,8 +72,8 @@ def get_my_events():
   events=Events.query.filter_by(submitted_by=user_id).all()
   event_list=[]
   for event in events:
-    if event.category=='event':
-      event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more})
+    
+    event_list.append({'title':event.title,'desc':event.desc,'poster_url':event.poster_url,'know_more':event.know_more,'category':event.category})
   return jsonify({'events':event_list}),200
 
 @events_bp.route('/get-all',methods=['GET'])

@@ -73,7 +73,7 @@ def upload_note():
     return jsonify({'message':f'Error saving academic details:{str(e)}'}),500
   
   return jsonify({'message':'Note uploaded successfully','data':{'url':result['secure_url']}}),200
-  
+
 @notes_bp.route('/upload/placement',methods=['POST'])
 @jwt_required()
 def upload_note_placement():
@@ -132,6 +132,7 @@ def get_submitted_by_me():
   note_list=[]
   for note in notes:
     note_list.append({
+      'id':note.id,
       'title':note.title,
       'submitted_on':note.submitted_on,
       'doc_url':note.doc_url,
@@ -274,3 +275,14 @@ def get_latest_placements():
       'likes':placement.likes
     })
   return jsonify({'placements':placement_list}),200
+
+@notes_bp.route('/delete/<int:id>',methods=['DELETE'])
+@jwt_required()
+def delete_note(id):
+  note=Notes.query.filter_by(id=id).first()
+  if note is None:
+    return jsonify({'message':'Note not found'}),404
+  
+  db.session.delete(note)
+  db.session.commit()
+  return jsonify({'message':'Note deleted successfully'}),200

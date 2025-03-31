@@ -6,6 +6,19 @@ from datetime import datetime
 
 queries_bp=Blueprint('queries',__name__)
 
+def time_ago(submitted_on):
+    now = datetime.now()
+    diff = now - submitted_on
+
+    if diff.days > 0:
+        return f"{diff.days} days ago"
+    elif diff.seconds // 3600 > 0:
+        return f"{diff.seconds // 3600} hours ago"
+    elif diff.seconds // 60 > 0:
+        return f"{diff.seconds // 60} minutes ago"
+    else:
+        return "just now"
+
 @queries_bp.route('/test',methods=['GET'])
 def test():
     return 'Queries route working'
@@ -66,7 +79,7 @@ def get_queries():
         if query.responses:
             response_list=[{
                 'response':response.response,
-                'responded_by':response.responded_by,
+                'responded_by':Users.query.filter(Users.id==response.responded_by).first().username,
                 'responded_on':response.responded_on
             } for response in query.responses]
         query_list.append({
@@ -75,8 +88,8 @@ def get_queries():
             'query_desc':query.query_desc,
             'responses':response_list,
             'stack':query.stack,
-            'submitted_by':query.submitted_by,
-            'submitted_on':query.submitted_on
+            'submitted_by':Users.query.filter(Users.id==query.submitted_by).first().username,
+            'submitted_on':time_ago(query.submitted_on)
         })
     return jsonify({'queries':query_list}),200
 
@@ -92,7 +105,7 @@ def get_my_queries():
         if query.responses:
             response_list=[{
                 'response':response.response,
-                'responded_by':response.responded_by,
+                'responded_by':Users.query.filter(Users.id==response.responded_by).first().username,
                 'responded_on':response.responded_on
             } for response in query.responses]
         query_list.append({
@@ -101,8 +114,8 @@ def get_my_queries():
             'query_desc':query.query_desc,
             'responses':response_list,
             'stack':query.stack,
-            'submitted_by':query.submitted_by,
-            'submitted_on':query.submitted_on
+            'submitted_by':Users.query.filter(Users.id==query.submitted_by).first().username,
+            'submitted_on':time_ago(query.submitted_on)
         })
     return jsonify({'queries':query_list}),200
 
@@ -151,8 +164,8 @@ def get_query(query_id):
     if query.responses:
         response_list=[{
             'response':response.response,
-            'responded_by':response.responded_by,
-            'responded_on':response.responded_on
+            'responded_by':Users.query.filter(Users.id==response.responded_by).first().username,
+            'responded_on':time_ago(response.responded_on),
         } for response in query.responses]
     
     return jsonify({"query":{
@@ -162,6 +175,6 @@ def get_query(query_id):
         'response_count':len(response_list),
         'responses':response_list,
         'stack':query.stack,
-        'submitted_by':query.submitted_by,
-        'submitted_on':query.submitted_on
+        'submitted_by':Users.query.filter(Users.id==query.submitted_by).first().username,
+        'submitted_on':time_ago(query.submitted_on)
     }}),200
