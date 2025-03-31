@@ -17,12 +17,11 @@ class Notes(db.Model):
     __tablename__ = 'notes'
 
     id=db.Column(db.Integer,primary_key=True,autoincrement=True)
-    # desc=db.Column(db.String(255),nullable=True)
     title=db.Column(db.String(50),nullable=False)
     submitted_by=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     submitted_on=db.Column(db.DateTime,nullable=False)
     doc_url=db.Column(db.String(255),nullable=False) 
-    # likes=db.Column(db.Integer,nullable=False)
+
     category=db.Column(sa.Enum('academics','placement',name='note_categories'),nullable=False)
 
 class AcademicNotes(db.Model):
